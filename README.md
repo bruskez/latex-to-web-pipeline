@@ -6,8 +6,6 @@ This project demonstrates a **clean, reproducible workflow** for converting LaTe
 
 It enables the ingestion, processing, and display of LaTeX content in formats suited for online browsing and AI-assisted use.
 
----
-
 ## Project Goals
 
 * Convert LaTeX documents into HTML using semantic tools
@@ -15,8 +13,6 @@ It enables the ingestion, processing, and display of LaTeX content in formats su
 * Enable navigable web output with stable section identifiers
 * Track changes from LaTeX sources to generated web documents
 * Lay the foundation for automated ingestion pipelines
-
----
 
 ## Repository Structure
 
@@ -27,13 +23,9 @@ site/       # Generated web output (sample document)
 docs/       # Notes and documentation
 ```
 
----
-
 ## Phase 0 — Project Initialization
 
 The project starts with a clean Linux environment, Git version control, and a minimal directory structure ensuring reproducibility and maintainability.
-
----
 
 ## Phase 1 — LaTeX Source Documents
 
@@ -49,8 +41,6 @@ src/main/
 
 This structure supports multi-document ingestion and avoids resource conflicts.
 
----
-
 ## Phase 2 — LaTeX to HTML Conversion
 
 LaTeXML is used to convert LaTeX sources to HTML:
@@ -58,8 +48,6 @@ LaTeXML is used to convert LaTeX sources to HTML:
 * mathematical content is preserved
 * document structure is retained
 * a web-oriented representation is generated
-
----
 
 ## Phase 3 — HTML Post-processing and Navigation
 
@@ -71,13 +59,9 @@ Custom post-processing script (`tools/postprocess_html.py`) enhances the raw HTM
 
 This step decouples semantic conversion from presentation logic.
 
----
-
 ## Phase 4 — Versioning and Change Tracking
 
 Git tracks changes in the LaTeX source and corresponding updates in the web output. This demonstrates end-to-end traceability from LaTeX edits to their web representation.
-
----
 
 ## Phase 5 —  Automation and Batch Ingestion
 
@@ -89,24 +73,15 @@ The project includes an automated pipeline to process **multiple LaTeX documents
 
 The pipeline generates structured web output, organizes images, and writes detailed logs.
 
----
-
 ## Logging and Reproducibility
 
 Logs are generated for each document, allowing inspection of warnings or errors. The process is deterministic: the same LaTeX sources will always reproduce the same web output.
-
----
 
 ## AI / Search Readiness
 The pipeline produces structured HTML with stable section identifiers, enabling extensions such as semantic search, document chunking, and AI-assisted exploration.
 
 For detailed AI/search feasibility, check `docs/ai_search_feasibility.md`.
 
----
-
 ## Notes
 
 The project is developed and tested in a Linux environment using standard open-source tools.
-
----
-
