@@ -49,8 +49,8 @@ for doc_dir in "${DOC_DIRS[@]}"; do
   mkdir -p "$out_dir"
 
   # Output HTML files
-  html_raw="$out_dir/index.html"        # Raw LaTeXML output
-  html_nav="$out_dir/index.nav.html"    # Post-processed navigable HTML
+  html_raw="$out_dir/${doc_name}.html"        # Raw LaTeXML output
+  html_nav="$out_dir/${doc_name}.nav.html"    # Post-processed navigable HTML
 
   # Log files
   log_latexml="$LOG_ROOT/latexmlc_${doc_name}.log"

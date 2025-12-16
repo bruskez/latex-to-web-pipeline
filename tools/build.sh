@@ -48,7 +48,7 @@ for TEX in "${TEX_FILES[@]}"; do
 
   # Output directory and HTML file for this module
   OUT_DIR="$SITE_DIR/$MODULE"
-  OUT_HTML="$OUT_DIR/index.html"
+  OUT_HTML="$OUT_DIR/$TEX_BASENAME.html"
 
   # Log file for this module
   LOG_FILE="$LOG_DIR/$MODULE.latexmlc.log"
