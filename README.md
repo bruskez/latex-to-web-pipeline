@@ -34,8 +34,8 @@ LaTeX documents are organized in individual directories under src/, with images 
 Example:
 
 ```text
-src/main/
-  ├── main.tex
+src/aamini/
+  ├── aamini.tex
   └── images/
 ```
 
@@ -43,11 +43,13 @@ This structure supports multi-document ingestion and avoids resource conflicts.
 
 ## Phase 2 — LaTeX to HTML Conversion
 
-LaTeXML is used to convert LaTeX sources to HTML:
+LaTeXML is used to convert LaTeX sources to HTML via a dedicated ingestion script
+(`tools/build.sh`):
 
-* mathematical content is preserved
-* document structure is retained
-* a web-oriented representation is generated
+- mathematical content is preserved
+- document structure is retained
+- a web-oriented representation is generated
+- multiple documents are processed in batch with per-document output and logs
 
 ## Phase 3 — HTML Post-processing and Navigation
 
