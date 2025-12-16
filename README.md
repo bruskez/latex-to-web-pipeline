@@ -49,7 +49,7 @@ LaTeXML is used to convert LaTeX sources to HTML via a dedicated ingestion scrip
 - mathematical content is preserved
 - document structure is retained
 - a web-oriented representation is generated
-- multiple documents are processed in batch with per-document output and logs
+- for each document, a raw `index.html` is created under `site/<document_name>/`
 
 ## Phase 3 — HTML Post-processing and Navigation
 
