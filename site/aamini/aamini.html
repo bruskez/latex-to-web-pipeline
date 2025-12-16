@@ -1,0 +1,615 @@
+<!DOCTYPE html><html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>1 Tree-based Methods</title>
+<!--Generated on Tue Dec 16 16:08:58 2025 by LaTeXML (version 0.8.6) http://dlmf.nist.gov/LaTeXML/.-->
+
+<link rel="stylesheet" href="LaTeXML.css" type="text/css">
+<link rel="stylesheet" href="ltx-article.css" type="text/css">
+<link rel="stylesheet" href="ltx-listings.css" type="text/css">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+</head>
+<body>
+<div class="ltx_page_main">
+<div class="ltx_page_content">
+<article class="ltx_document">
+<section id="S1" class="ltx_section">
+<h2 class="ltx_title ltx_title_section">
+<span class="ltx_tag ltx_tag_section">1 </span>Tree-based Methods</h2>
+
+<div id="S1.p1" class="ltx_para">
+<p class="ltx_p">Here we describe tree-based methods for regression and classification. These involve stratifying or segmenting the predictor space into a number of simple regions: these types of approaches are known as <em class="ltx_emph ltx_font_italic">decision-tree</em> methods.</p>
+<ul id="S1.I1" class="ltx_itemize">
+<li id="S1.I1.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">-</span> 
+<div id="S1.I1.i1.p1" class="ltx_para">
+<p class="ltx_p">Tree-based methods are simple and useful for interpretation;</p>
+</div>
+</li>
+<li id="S1.I1.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">-</span> 
+<div id="S1.I1.i2.p1" class="ltx_para">
+<p class="ltx_p">They typically are not competitive with the best supervised learning approaches in terms of prediction accuracy.</p>
+</div>
+</li>
+</ul>
+<p class="ltx_p">Hence we also discuss <em class="ltx_emph ltx_font_italic">bagging</em>, <em class="ltx_emph ltx_font_italic">random forests</em>, and <em class="ltx_emph ltx_font_italic">boosting</em>. These methods grow multiple trees which are then combined to yield a single consensus prediction.
+
+<br class="ltx_break">Decision trees can be applied to both regression and classification problems. We first consider regression problems, and then move on to classification.</p>
+</div>
+<section id="S1.SS0.SSS1" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">1.0.1 </span>Terminology for Trees</h4>
+
+<figure id="S1.F1" class="ltx_figure"><span class="ltx_inline-para ltx_minipage ltx_align_middle" style="width:208.1pt;">
+<span id="S1.F1.p1" class="ltx_para ltx_align_center"><img src="images/fig1.png" id="S1.F1.p1.g1" class="ltx_graphics" width="379" height="336" alt="Hitters data. ">
+</span></span><span class="ltx_inline-para ltx_minipage ltx_align_middle" style="width:208.1pt;">
+<span id="S1.F1.p2" class="ltx_para ltx_align_center"><img src="images/fig2.png" id="S1.F1.p2.g1" class="ltx_graphics" width="379" height="371" alt="Hitters data. ">
+</span></span>
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure">Figure 1: </span>Hitters data. <em class="ltx_emph ltx_font_italic">Left</em>: salary is color-coded from low (blue, green) to high (yellow, red). <em class="ltx_emph ltx_font_italic">Right</em>: decision tree for these data. The left-hand branch corresponds to Years<math id="S1.F1.m3" class="ltx_Math" alttext="&lt;" display="inline"><mo>&lt;</mo></math>4.5, and the right-hand branch corresponds to Years<math id="S1.F1.m4" class="ltx_Math" alttext="\geq" display="inline"><mo>≥</mo></math>4.5.</figcaption>
+</figure>
+<div id="S1.SS0.SSS1.p1" class="ltx_para">
+<ul id="S1.I2" class="ltx_itemize">
+<li id="S1.I2.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">–</span> 
+<div id="S1.I2.i1.p1" class="ltx_para">
+<p class="ltx_p">The tree in Figure (BOOO) has two <em class="ltx_emph ltx_font_italic">internal nodes</em> (points along the tree where the predictor space is split) and three <em class="ltx_emph ltx_font_italic">terminal nodes</em>, or leaves.</p>
+</div>
+</li>
+<li id="S1.I2.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">–</span> 
+<div id="S1.I2.i2.p1" class="ltx_para">
+<p class="ltx_p">The number in each leaf is <em class="ltx_emph ltx_font_italic">the mean</em> of the response for the observations that fall there.</p>
+</div>
+</li>
+<li id="S1.I2.i3" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">–</span> 
+<div id="S1.I2.i3.p1" class="ltx_para">
+<p class="ltx_p">Decision trees are typically drawn <em class="ltx_emph ltx_font_italic">upside down</em>, in the sense that the leaves are at the bottom of the tree.</p>
+</div>
+</li>
+</ul>
+</div>
+<figure id="S1.F2" class="ltx_figure"><img src="images/fig3.png" id="S1.F2.g1" class="ltx_graphics ltx_centering" width="243" height="202" alt="The tree stratifies or segments the players into three regions of predictor space: ">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 2: </span>The tree stratifies or segments the players into three regions of predictor space: <math id="S1.F2.m4" class="ltx_Math" alttext="R_{1}=\{X\mid Years&lt;4.5\},R_{2}=\{X\mid Years\geq 4.5,Hits&lt;117.5\},andR_{3}=\{%
+X\mid Years\geq 4.5,Hits\geq 117.5" display="inline"><mrow><msub><mi>R</mi><mn>1</mn></msub><mo>=</mo><mrow><mo stretchy="false">{</mo><mi>X</mi><mo>∣</mo><mi>Y</mi><mi>e</mi><mi>a</mi><mi>r</mi><mi>s</mi><mo>&lt;</mo><mn>4.5</mn><mo stretchy="false">}</mo></mrow><mo>,</mo><msub><mi>R</mi><mn>2</mn></msub><mo>=</mo><mrow><mo stretchy="false">{</mo><mi>X</mi><mo>∣</mo><mi>Y</mi><mi>e</mi><mi>a</mi><mi>r</mi><mi>s</mi><mo>≥</mo><mn>4.5</mn><mo>,</mo><mi>H</mi><mi>i</mi><mi>t</mi><mi>s</mi><mo>&lt;</mo><mn>117.5</mn><mo stretchy="false">}</mo></mrow><mo>,</mo><mi>a</mi><mi>n</mi><mi>d</mi><msub><mi>R</mi><mn>3</mn></msub><mo>=</mo><mrow><mo stretchy="false">{</mo><mi>X</mi><mo>∣</mo><mi>Y</mi><mi>e</mi><mi>a</mi><mi>r</mi><mi>s</mi><mo>≥</mo><mn>4.5</mn><mo>,</mo><mi>H</mi><mi>i</mi><mi>t</mi><mi>s</mi><mo>≥</mo><mn>117.5</mn></mrow></mrow></math>}. The regions <math id="S1.F2.m5" class="ltx_Math" alttext="R_{1},R_{2}" display="inline"><mrow><msub><mi>R</mi><mn>1</mn></msub><mo>,</mo><msub><mi>R</mi><mn>2</mn></msub></mrow></math> and <math id="S1.F2.m6" class="ltx_Math" alttext="R_{3}" display="inline"><msub><mi>R</mi><mn>3</mn></msub></math> are known as <em class="ltx_emph ltx_font_italic">terminal nodes</em>.</figcaption>
+</figure>
+<div id="S1.SS0.SSS1.p2" class="ltx_para ltx_noindent">
+<p class="ltx_p"><em class="ltx_emph ltx_font_italic">Interpretation of results</em>
+
+<br class="ltx_break"><span class="ltx_text ltx_font_typewriter">Years</span> is the most important factor in determining <span class="ltx_text ltx_font_typewriter">Salary</span>. Given that a player is less experienced, the number of <span class="ltx_text ltx_font_typewriter">Hits</span> that he made in the previous year seems to play little role in his <span class="ltx_text ltx_font_typewriter">Salary</span>.
+
+<br class="ltx_break">But among players who have been in the major leagues for five or more years, the number of <span class="ltx_text ltx_font_typewriter">Hits</span> made in the previous year does affect <span class="ltx_text ltx_font_typewriter">Salary</span>, and players who made more <span class="ltx_text ltx_font_typewriter">Hits</span> last year tend to have higher salaries.</p>
+</div>
+</section>
+<section id="S1.SS0.SSS2" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">1.0.2 </span>Details of the tree-building process</h4>
+
+<div id="S1.SS0.SSS2.p1" class="ltx_para">
+<p class="ltx_p">The aim of tree-building process is to divide the predictor space — that is, the set of possible values for <math id="S1.SS0.SSS2.p1.m1" class="ltx_Math" alttext="X_{1},X_{2},\ldots,X_{p}" display="inline"><mrow><msub><mi>X</mi><mn>1</mn></msub><mo>,</mo><msub><mi>X</mi><mn>2</mn></msub><mo>,</mo><mi mathvariant="normal">…</mi><mo>,</mo><msub><mi>X</mi><mi>p</mi></msub></mrow></math> — into <math id="S1.SS0.SSS2.p1.m2" class="ltx_Math" alttext="J" display="inline"><mi>J</mi></math> distinct and non-overlapping regions, <math id="S1.SS0.SSS2.p1.m3" class="ltx_Math" alttext="R_{1},R_{2},\ldots,R_{J}" display="inline"><mrow><msub><mi>R</mi><mn>1</mn></msub><mo>,</mo><msub><mi>R</mi><mn>2</mn></msub><mo>,</mo><mi mathvariant="normal">…</mi><mo>,</mo><msub><mi>R</mi><mi>J</mi></msub></mrow></math> and for every observation that falls into the region <math id="S1.SS0.SSS2.p1.m4" class="ltx_Math" alttext="R_{j}" display="inline"><msub><mi>R</mi><mi>j</mi></msub></math>, we make the same prediction, which is simply the mean of the response values for the training observations in <math id="S1.SS0.SSS2.p1.m5" class="ltx_Math" alttext="R_{j}" display="inline"><msub><mi>R</mi><mi>j</mi></msub></math>.
+
+<br class="ltx_break">In theory, the regions could have any shape. However, we choose to divide the predictor space into high-dimensional rectangles, or boxes, for simplicity. The goal is to find boxes <math id="S1.SS0.SSS2.p1.m6" class="ltx_Math" alttext="R_{1},\ldots,R_{J}" display="inline"><mrow><msub><mi>R</mi><mn>1</mn></msub><mo>,</mo><mi mathvariant="normal">…</mi><mo>,</mo><msub><mi>R</mi><mi>J</mi></msub></mrow></math> that minimize the RSS, given by
+</p>
+<table id="S1.Ex1" class="ltx_equation ltx_eqn_table">
+
+<tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="S1.Ex1.m1" class="ltx_Math" alttext="\sum_{j=1}^{J}\sum_{i\in R_{j}}(y_{i}-\hat{y}_{R_{j}})^{2}" display="block"><mrow><munderover><mo largeop="true" movablelimits="false" symmetric="true">∑</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>J</mi></munderover><mrow><munder><mo largeop="true" movablelimits="false" symmetric="true">∑</mo><mrow><mi>i</mi><mo>∈</mo><msub><mi>R</mi><mi>j</mi></msub></mrow></munder><msup><mrow><mo stretchy="false">(</mo><mrow><msub><mi>y</mi><mi>i</mi></msub><mo>-</mo><msub><mover accent="true"><mi>y</mi><mo stretchy="false">^</mo></mover><msub><mi>R</mi><mi>j</mi></msub></msub></mrow><mo stretchy="false">)</mo></mrow><mn>2</mn></msup></mrow></mrow></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+</tr>
+</table>
+<p class="ltx_p">where <math id="S1.SS0.SSS2.p1.m7" class="ltx_Math" alttext="\hat{y}_{R_{j}}" display="inline"><msub><mover accent="true"><mi>y</mi><mo stretchy="false">^</mo></mover><msub><mi>R</mi><mi>j</mi></msub></msub></math> is the mean response for the training observations within the <math id="S1.SS0.SSS2.p1.m8" class="ltx_Math" alttext="j" display="inline"><mi>j</mi></math>th box.
+
+<br class="ltx_break">Unfortunately, it is computationally infeasible to consider every possible partition of the feature space into <math id="S1.SS0.SSS2.p1.m9" class="ltx_Math" alttext="J" display="inline"><mi>J</mi></math> boxes. For this reason, we take a <span class="ltx_text ltx_font_bold">top-down, greedy</span> approach that is known as <em class="ltx_emph ltx_font_italic">recursive binary splitting</em>. The approach is <em class="ltx_emph ltx_font_italic">top-down</em> because it begins at the top of the tree and then successively splits the predictor space; each split is indicated via two new branches further down on the tree; it is <em class="ltx_emph ltx_font_italic">greedy</em> because at each step of the tree-building process, the best split is made <em class="ltx_emph ltx_font_italic">at that particular step</em>, rather than looking ahead and picking a split that will lead to a better tree in some future step.</p>
+<ol id="S1.I3" class="ltx_enumerate">
+<li id="S1.I3.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">1.</span> 
+<div id="S1.I3.i1.p1" class="ltx_para">
+<p class="ltx_p">We first select the predictor <math id="S1.I3.i1.p1.m1" class="ltx_Math" alttext="X_{j}" display="inline"><msub><mi>X</mi><mi>j</mi></msub></math> and the cutpoint <math id="S1.I3.i1.p1.m2" class="ltx_Math" alttext="s" display="inline"><mi>s</mi></math> such that splitting the predictor space into the regions <math id="S1.I3.i1.p1.m3" class="ltx_Math" alttext="\{X\mid X_{j}&lt;s\}" display="inline"><mrow><mo stretchy="false">{</mo><mi>X</mi><mo>∣</mo><mrow><msub><mi>X</mi><mi>j</mi></msub><mo>&lt;</mo><mi>s</mi></mrow><mo stretchy="false">}</mo></mrow></math> and <math id="S1.I3.i1.p1.m4" class="ltx_Math" alttext="\{X\mid X_{j}\geq s\}" display="inline"><mrow><mo stretchy="false">{</mo><mi>X</mi><mo>∣</mo><mrow><msub><mi>X</mi><mi>j</mi></msub><mo>≥</mo><mi>s</mi></mrow><mo stretchy="false">}</mo></mrow></math> leads to the greatest possible reduction in RSS.</p>
+</div>
+</li>
+<li id="S1.I3.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">2.</span> 
+<div id="S1.I3.i2.p1" class="ltx_para">
+<p class="ltx_p">Next, we repeat the process, looking for the best predictor and best cutpoint in order to split the data further so as to minimize the RSS within each of the resulting regions.</p>
+<ul id="S1.I3.i2.I1" class="ltx_itemize">
+<li id="S1.I3.i2.I1.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item"><math id="S1.I3.i2.I1.i1.m1" class="ltx_Math" alttext="\rightarrow" display="inline"><mo>→</mo></math></span> 
+<div id="S1.I3.i2.I1.i1.p1" class="ltx_para">
+<p class="ltx_p">This time instead of splitting the entire predictor space we split one of the two previously identified regions. We now have three regions.</p>
+</div>
+</li>
+</ul>
+</div>
+</li>
+<li id="S1.I3.i3" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">3.</span> 
+<div id="S1.I3.i3.p1" class="ltx_para">
+<p class="ltx_p">Again, we look to split one of these three regions further, so as to minimize the RSS. The process continues until a stopping criterion is reached; for instance, we may continue until no region contains more than five observations.</p>
+</div>
+</li>
+<li id="S1.I3.i4" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">4.</span> 
+<div id="S1.I3.i4.p1" class="ltx_para">
+<p class="ltx_p">We predict the response for a given test observation using the mean of the training observations in the region to which that test observation belongs.</p>
+</div>
+</li>
+</ol>
+</div>
+<figure id="S1.F3" class="ltx_figure"><img src="images/fig4.png" id="S1.F3.g1" class="ltx_graphics ltx_centering" width="271" height="267" alt=": A partition of two-dimensional feature space that could not result from recursive binary splitting. ">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 3: </span><em class="ltx_emph ltx_font_italic">Top Left</em>: A partition of two-dimensional feature space that could not result from recursive binary splitting. <em class="ltx_emph ltx_font_italic">Top Right</em>: The output of recursive binary splitting on a two-dimensional example. <em class="ltx_emph ltx_font_italic">Bottom Left</em>: A tree corresponding to the partition in the top right panel. <em class="ltx_emph ltx_font_italic">Bottom Right</em>: A perspective plot of the prediction surface corresponding to that tree.</figcaption>
+</figure>
+</section>
+<section id="S1.SS1" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">1.1 </span>Pruning a tree</h3>
+
+<div id="S1.SS1.p1" class="ltx_para">
+<p class="ltx_p">The process described above may produce good predictions on the training set but is likely to overfit the data, leading to poor test set performance: a smaller tree with fewer splits (that is, fewer regions <math id="S1.SS1.p1.m1" class="ltx_Math" alttext="R_{1},\ldots,R_{J}" display="inline"><mrow><msub><mi>R</mi><mn>1</mn></msub><mo>,</mo><mi mathvariant="normal">…</mi><mo>,</mo><msub><mi>R</mi><mi>J</mi></msub></mrow></math>) might lead to lower variance and better interpretation at the cost of a little bias.
+
+<br class="ltx_break">One possible alternative to the process described above is to grow the tree only so long as the decrease in the RSS due to each split <em class="ltx_emph ltx_font_italic">exceeds some (high) threshold</em>.</p>
+<ul id="S1.I4" class="ltx_itemize">
+<li id="S1.I4.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item"><math id="S1.I4.i1.m1" class="ltx_Math" alttext="\rightarrow" display="inline"><mo>→</mo></math></span> 
+<div id="S1.I4.i1.p1" class="ltx_para">
+<p class="ltx_p">This strategy will result in smaller trees, but is too short-sighted: a seemingly worthless split early on in the tree might be followed by a very good split — that is, a split that leads to a large reduction in RSS later on.</p>
+</div>
+</li>
+</ul>
+<p class="ltx_p">A better strategy is to grow a very large tree <math id="S1.SS1.p1.m2" class="ltx_Math" alttext="T_{0}" display="inline"><msub><mi>T</mi><mn>0</mn></msub></math>, and then prune it back in order to obtain a subtree</p>
+<ul id="S1.I5" class="ltx_itemize">
+<li id="S1.I5.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item"><math id="S1.I5.i1.m1" class="ltx_Math" alttext="\rightarrow" display="inline"><mo>→</mo></math></span> 
+<div id="S1.I5.i1.p1" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">Cost complexity pruning</span> — also known as <em class="ltx_emph ltx_font_italic">weakest link pruning</em> — is used to do this.</p>
+</div>
+</li>
+</ul>
+<p class="ltx_p">We consider a sequence of trees indexed by a nonnegative tuning parameter <math id="S1.SS1.p1.m3" class="ltx_Math" alttext="\alpha" display="inline"><mi>α</mi></math>. For each value of <math id="S1.SS1.p1.m4" class="ltx_Math" alttext="\alpha" display="inline"><mi>α</mi></math> there corresponds a subtree <math id="S1.SS1.p1.m5" class="ltx_Math" alttext="T\subset T_{0}" display="inline"><mrow><mi>T</mi><mo>⊂</mo><msub><mi>T</mi><mn>0</mn></msub></mrow></math> such that</p>
+<table id="S1.Ex2" class="ltx_equation ltx_eqn_table">
+
+<tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="S1.Ex2.m1" class="ltx_Math" alttext="\sum_{m=1}^{|T|}\sum_{i:x_{i}\in R_{m}}(y_{i}-\hat{y}_{R_{m}})^{2}+\alpha|T|" display="block"><mrow><mrow><munderover><mo largeop="true" movablelimits="false" symmetric="true">∑</mo><mrow><mi>m</mi><mo>=</mo><mn>1</mn></mrow><mrow><mo stretchy="false">|</mo><mi>T</mi><mo stretchy="false">|</mo></mrow></munderover><mrow><munder><mo largeop="true" movablelimits="false" symmetric="true">∑</mo><mrow><mi>i</mi><mo>:</mo><mrow><msub><mi>x</mi><mi>i</mi></msub><mo>∈</mo><msub><mi>R</mi><mi>m</mi></msub></mrow></mrow></munder><msup><mrow><mo stretchy="false">(</mo><mrow><msub><mi>y</mi><mi>i</mi></msub><mo>-</mo><msub><mover accent="true"><mi>y</mi><mo stretchy="false">^</mo></mover><msub><mi>R</mi><mi>m</mi></msub></msub></mrow><mo stretchy="false">)</mo></mrow><mn>2</mn></msup></mrow></mrow><mo>+</mo><mrow><mi>α</mi><mo>⁢</mo><mrow><mo stretchy="false">|</mo><mi>T</mi><mo stretchy="false">|</mo></mrow></mrow></mrow></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+</tr>
+</table>
+<p class="ltx_p">is as small as possible. Here <math id="S1.SS1.p1.m6" class="ltx_Math" alttext="|T|" display="inline"><mrow><mo stretchy="false">|</mo><mi>T</mi><mo stretchy="false">|</mo></mrow></math> indicates the number of terminal nodes of the tree <math id="S1.SS1.p1.m7" class="ltx_Math" alttext="T" display="inline"><mi>T</mi></math>, <math id="S1.SS1.p1.m8" class="ltx_Math" alttext="R_{m}" display="inline"><msub><mi>R</mi><mi>m</mi></msub></math> is the rectangle (i.e. the subset of predictor space) corresponding to the <math id="S1.SS1.p1.m9" class="ltx_Math" alttext="m" display="inline"><mi>m</mi></math>th terminal node, and <math id="S1.SS1.p1.m10" class="ltx_Math" alttext="\hat{y}_{R_{m}}" display="inline"><msub><mover accent="true"><mi>y</mi><mo stretchy="false">^</mo></mover><msub><mi>R</mi><mi>m</mi></msub></msub></math> is the mean of the training observations in <math id="S1.SS1.p1.m11" class="ltx_Math" alttext="R_{m}" display="inline"><msub><mi>R</mi><mi>m</mi></msub></math>.</p>
+</div>
+<section id="S1.SS1.SSS1" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">1.1.1 </span>Choosing the best subtree</h4>
+
+<div id="S1.SS1.SSS1.p1" class="ltx_para">
+<p class="ltx_p">The tuning parameter <math id="S1.SS1.SSS1.p1.m1" class="ltx_Math" alttext="\alpha" display="inline"><mi>α</mi></math> controls a trade-off between the subtree’s complexity and its fit to the training data. We select an optimal value <math id="S1.SS1.SSS1.p1.m2" class="ltx_Math" alttext="\hat{\alpha}" display="inline"><mover accent="true"><mi>α</mi><mo stretchy="false">^</mo></mover></math> using <em class="ltx_emph ltx_font_italic">cross-validation</em>; we then return to the full data set and obtain the subtree corresponding to <math id="S1.SS1.SSS1.p1.m3" class="ltx_Math" alttext="\hat{\alpha}" display="inline"><mover accent="true"><mi>α</mi><mo stretchy="false">^</mo></mover></math>.</p>
+</div>
+</section>
+</section>
+<section id="S1.SS2" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">1.2 </span>Summary: tree algorithm</h3>
+
+<div id="S1.SS2.p1" class="ltx_para">
+<ol id="S1.I6" class="ltx_enumerate">
+<li id="S1.I6.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">1.</span> 
+<div id="S1.I6.i1.p1" class="ltx_para">
+<p class="ltx_p">Use recursive binary splitting to grow a large tree on the training data, stopping only when each terminal node has fewer than some minimum number of observations.</p>
+</div>
+</li>
+<li id="S1.I6.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">2.</span> 
+<div id="S1.I6.i2.p1" class="ltx_para">
+<p class="ltx_p">Apply cost complexity pruning to the large tree in order to obtain a sequence of best subtrees, as a function of <math id="S1.I6.i2.p1.m1" class="ltx_Math" alttext="\alpha" display="inline"><mi>α</mi></math>.</p>
+</div>
+</li>
+<li id="S1.I6.i3" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">3.</span> 
+<div id="S1.I6.i3.p1" class="ltx_para">
+<p class="ltx_p">Use K-fold cross-validation to choose <math id="S1.I6.i3.p1.m1" class="ltx_Math" alttext="\alpha" display="inline"><mi>α</mi></math>. For each <math id="S1.I6.i3.p1.m2" class="ltx_Math" alttext="k=1,\ldots,K" display="inline"><mrow><mi>k</mi><mo>=</mo><mrow><mn>1</mn><mo>,</mo><mi mathvariant="normal">…</mi><mo>,</mo><mi>K</mi></mrow></mrow></math>:</p>
+<ol id="S1.I6.i3.I1" class="ltx_enumerate">
+<li id="S1.I6.i3.I1.ix1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">3.1</span> 
+<div id="S1.I6.i3.I1.ix1.p1" class="ltx_para">
+<p class="ltx_p">Repeat Steps 1 and 2 on the <math id="S1.I6.i3.I1.ix1.p1.m1" class="ltx_Math" alttext="\frac{K-1}{K}" display="inline"><mfrac><mrow><mi>K</mi><mo>-</mo><mn>1</mn></mrow><mi>K</mi></mfrac></math>th fraction of the training
+data, excluding the <math id="S1.I6.i3.I1.ix1.p1.m2" class="ltx_Math" alttext="k" display="inline"><mi>k</mi></math>th fold.</p>
+</div>
+</li>
+<li id="S1.I6.i3.I1.ix2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">3.2</span> 
+<div id="S1.I6.i3.I1.ix2.p1" class="ltx_para">
+<p class="ltx_p">Evaluate the mean squared prediction error on the data in the left-out <math id="S1.I6.i3.I1.ix2.p1.m1" class="ltx_Math" alttext="k" display="inline"><mi>k</mi></math>th fold, as a function of <math id="S1.I6.i3.I1.ix2.p1.m2" class="ltx_Math" alttext="\alpha" display="inline"><mi>α</mi></math>.</p>
+</div>
+</li>
+</ol>
+<p class="ltx_p">Average the results, and pick <math id="S1.I6.i3.p1.m3" class="ltx_Math" alttext="\alpha" display="inline"><mi>α</mi></math> to minimize the average error.</p>
+</div>
+</li>
+<li id="S1.I6.i4" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">4.</span> 
+<div id="S1.I6.i4.p1" class="ltx_para">
+<p class="ltx_p">Return the subtree from Step 2 that corresponds to the chosen value of <math id="S1.I6.i4.p1.m1" class="ltx_Math" alttext="\alpha" display="inline"><mi>α</mi></math>.</p>
+</div>
+</li>
+</ol>
+</div>
+<figure id="S1.F4" class="ltx_figure"><span class="ltx_inline-para ltx_minipage ltx_align_middle" style="width:186.5pt;">
+<span id="S1.F4.p1" class="ltx_para ltx_align_center"><img src="images/fig5.png" id="S1.F4.p1.g1" class="ltx_graphics" width="486" height="406" alt="We randomly divided the data set in the training set (132) and in the test set (131). A large regression tree (no pruning) on the training data and varied ">
+</span></span><span class="ltx_inline-para ltx_minipage ltx_align_middle" style="width:229.8pt;">
+<span id="S1.F4.p2" class="ltx_para ltx_align_center"><img src="images/fig6.png" id="S1.F4.p2.g1" class="ltx_graphics" width="541" height="362" alt="We randomly divided the data set in the training set (132) and in the test set (131). A large regression tree (no pruning) on the training data and varied ">
+</span></span>
+<figcaption class="ltx_caption"><span class="ltx_tag ltx_tag_figure">Figure 4: </span>We randomly divided the data set in the training set (132) and in the test set (131). A large regression tree (no pruning) on the training data and varied <math id="S1.F4.m3" class="ltx_Math" alttext="\alpha" display="inline"><mi>α</mi></math> to create subtrees with different numbers of terminal nodes are built. Finally, we performed six-fold cross-validation to estimate the cross-validated MSE of the trees as a function of <math id="S1.F4.m4" class="ltx_Math" alttext="\alpha" display="inline"><mi>α</mi></math>.</figcaption>
+</figure>
+</section>
+<section id="S1.SS3" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">1.3 </span>Classification Trees</h3>
+
+<div id="S1.SS3.p1" class="ltx_para">
+<p class="ltx_p">Very similar to a regression tree, except that it is used to predict a qualitative response rather than a quantitative one. For a classification tree, we predict that each observation belongs to the most commonly occurring class of training observations in the region to which it belongs. Just as in the regression setting, we use <em class="ltx_emph ltx_font_italic">recursive binary splitting</em> to grow a classification tree.
+
+<br class="ltx_break">In the classification setting, RSS cannot be used as a criterion for making the binary splits: a natural alternative to RSS is the <em class="ltx_emph ltx_font_italic">classification error rate</em>. This is simply the fraction of the training observations in that region that do not belong to the most common class:</p>
+<table id="S1.Ex3" class="ltx_equation ltx_eqn_table">
+
+<tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="S1.Ex3.m1" class="ltx_Math" alttext="E=1-\max_{k}(\hat{p}_{mk})" display="block"><mrow><mi>E</mi><mo>=</mo><mrow><mn>1</mn><mo>-</mo><mrow><munder><mi>max</mi><mi>k</mi></munder><mo>⁡</mo><mrow><mo stretchy="false">(</mo><msub><mover accent="true"><mi>p</mi><mo stretchy="false">^</mo></mover><mrow><mi>m</mi><mo>⁢</mo><mi>k</mi></mrow></msub><mo stretchy="false">)</mo></mrow></mrow></mrow></mrow></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+</tr>
+</table>
+<p class="ltx_p">Here <math id="S1.SS3.p1.m1" class="ltx_Math" alttext="\hat{p}_{mk}" display="inline"><msub><mover accent="true"><mi>p</mi><mo stretchy="false">^</mo></mover><mrow><mi>m</mi><mo>⁢</mo><mi>k</mi></mrow></msub></math> represents the proportion of training observations in the <math id="S1.SS3.p1.m2" class="ltx_Math" alttext="m" display="inline"><mi>m</mi></math>th region that are from the <math id="S1.SS3.p1.m3" class="ltx_Math" alttext="k" display="inline"><mi>k</mi></math>th class.
+
+<br class="ltx_break">However classification error is not sufficiently sensitive for tree-growing, and in practice two other measures are preferable:</p>
+<ul id="S1.I7" class="ltx_itemize">
+<li id="S1.I7.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S1.I7.i1.p1" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">The Gini index</span> is defined by</p>
+<table id="S1.Ex4" class="ltx_equation ltx_eqn_table">
+
+<tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="S1.Ex4.m1" class="ltx_Math" alttext="G=\sum_{k=1}^{K}\hat{p}_{mk}(1-\hat{p}_{mk})" display="block"><mrow><mi>G</mi><mo>=</mo><mrow><munderover><mo largeop="true" movablelimits="false" symmetric="true">∑</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>K</mi></munderover><mrow><msub><mover accent="true"><mi>p</mi><mo stretchy="false">^</mo></mover><mrow><mi>m</mi><mo>⁢</mo><mi>k</mi></mrow></msub><mo>⁢</mo><mrow><mo stretchy="false">(</mo><mrow><mn>1</mn><mo>-</mo><msub><mover accent="true"><mi>p</mi><mo stretchy="false">^</mo></mover><mrow><mi>m</mi><mo>⁢</mo><mi>k</mi></mrow></msub></mrow><mo stretchy="false">)</mo></mrow></mrow></mrow></mrow></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+</tr>
+</table>
+<p class="ltx_p">a measure of total variance across the K classes. The Gini index takes on a small value if all of the <math id="S1.I7.i1.p1.m1" class="ltx_Math" alttext="\hat{p}_{mk}" display="inline"><msub><mover accent="true"><mi>p</mi><mo stretchy="false">^</mo></mover><mrow><mi>m</mi><mo>⁢</mo><mi>k</mi></mrow></msub></math>’s are close to zero or one.
+
+<br class="ltx_break">For this reason the Gini index is referred to as a measure of node <em class="ltx_emph ltx_font_italic">purity</em> — a small value indicates that a node contains predominantly observations from a single class.
+</p>
+</div>
+</li>
+<li id="S1.I7.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S1.I7.i2.p1" class="ltx_para">
+<p class="ltx_p"><span class="ltx_text ltx_font_bold">The cross-entropy</span> is an alternative to the Gini index and is given by</p>
+<table id="S1.Ex5" class="ltx_equation ltx_eqn_table">
+
+<tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="S1.Ex5.m1" class="ltx_Math" alttext="D=-\sum_{k=1}^{K}\hat{p}_{mk}\log{\hat{p}_{mk}}" display="block"><mrow><mi>D</mi><mo>=</mo><mrow><mo>-</mo><mrow><munderover><mo largeop="true" movablelimits="false" symmetric="true">∑</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>K</mi></munderover><mrow><msub><mover accent="true"><mi>p</mi><mo stretchy="false">^</mo></mover><mrow><mi>m</mi><mo>⁢</mo><mi>k</mi></mrow></msub><mo>⁢</mo><mrow><mi>log</mi><mo>⁡</mo><msub><mover accent="true"><mi>p</mi><mo stretchy="false">^</mo></mover><mrow><mi>m</mi><mo>⁢</mo><mi>k</mi></mrow></msub></mrow></mrow></mrow></mrow></mrow></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+</tr>
+</table>
+<p class="ltx_p">It turns out that the Gini index and the cross-entropy are very similar numerically.</p>
+</div>
+</li>
+</ul>
+</div>
+<section id="S1.SS3.SSS1" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">1.3.1 </span>Advantages and Disadvantages of Trees</h4>
+
+<div id="S1.SS3.SSS1.p1" class="ltx_para">
+<ul id="S1.I8" class="ltx_itemize">
+<li id="S1.I8.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">+</span> 
+<div id="S1.I8.i1.p1" class="ltx_para">
+<p class="ltx_p">Trees are very easy to explain to people, even than linear regression. Trees can be displayed graphically, and are easily interpreted (especially if they are small).</p>
+</div>
+</li>
+<li id="S1.I8.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">+</span> 
+<div id="S1.I8.i2.p1" class="ltx_para">
+<p class="ltx_p">Some people believe that decision trees more closely mirror human decision-making than do the regression and classification approaches.</p>
+</div>
+</li>
+<li id="S1.I8.i3" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">+</span> 
+<div id="S1.I8.i3.p1" class="ltx_para">
+<p class="ltx_p">Trees can easily handle qualitative predictors without the need to create dummy variables.</p>
+</div>
+</li>
+</ul>
+<ul id="S1.I9" class="ltx_itemize">
+<li id="S1.I9.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">–</span> 
+<div id="S1.I9.i1.p1" class="ltx_para">
+<p class="ltx_p">Unfortunately, trees generally do not have the same level of predictive accuracy as some of the other regression and classification approaches seen so far.</p>
+</div>
+</li>
+</ul>
+</div>
+</section>
+</section>
+<section id="S1.SS4" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">1.4 </span>Bagging</h3>
+
+<div id="S1.SS4.p1" class="ltx_para">
+<p class="ltx_p"><em class="ltx_emph ltx_font_italic">Bootstrap aggregation</em>, or <em class="ltx_emph ltx_font_italic">bagging</em>, is a general-purpose procedure for reducing the variance of a statistical learning method; we introduce it here because it is particularly useful and frequently used in the context of decision trees.
+
+<br class="ltx_break">Recall that given a set of <math id="S1.SS4.p1.m1" class="ltx_Math" alttext="n" display="inline"><mi>n</mi></math> independent observations <math id="S1.SS4.p1.m2" class="ltx_Math" alttext="Z_{1},\ldots,Z_{n}" display="inline"><mrow><msub><mi>Z</mi><mn>1</mn></msub><mo>,</mo><mi mathvariant="normal">…</mi><mo>,</mo><msub><mi>Z</mi><mi>n</mi></msub></mrow></math>, each with variance <math id="S1.SS4.p1.m3" class="ltx_Math" alttext="\sigma^{2}" display="inline"><msup><mi>σ</mi><mn>2</mn></msup></math>, the variance of the mean <math id="S1.SS4.p1.m4" class="ltx_Math" alttext="\bar{Z}" display="inline"><mover accent="true"><mi>Z</mi><mo stretchy="false">¯</mo></mover></math> of the observations is given by <math id="S1.SS4.p1.m5" class="ltx_Math" alttext="\sigma^{2}/n" display="inline"><mrow><msup><mi>σ</mi><mn>2</mn></msup><mo>/</mo><mi>n</mi></mrow></math>.
+
+<br class="ltx_break">In other words, averaging a set of observations <em class="ltx_emph ltx_font_italic">reduces variance</em>. Of course, this is not practical because we generally do not have access to multiple training sets. Instead, we can bootstrap, by taking repeated samples from the (single) training data set.
+
+<br class="ltx_break">In this approach we generate <math id="S1.SS4.p1.m6" class="ltx_Math" alttext="B" display="inline"><mi>B</mi></math> different bootstrapped training data sets. We then train our method on the <math id="S1.SS4.p1.m7" class="ltx_Math" alttext="b" display="inline"><mi>b</mi></math>th bootstrapped training set in order to get <math id="S1.SS4.p1.m8" class="ltx_Math" alttext="\hat{f}^{*b}(x)" display="inline"><mrow><msup><mover accent="true"><mi>f</mi><mo stretchy="false">^</mo></mover><mrow><mi></mi><mo>*</mo><mi>b</mi></mrow></msup><mo>⁢</mo><mrow><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></mrow></math>, the prediction at a point <math id="S1.SS4.p1.m9" class="ltx_Math" alttext="x" display="inline"><mi>x</mi></math>. We then average all the predictions to obtain</p>
+<table id="S1.Ex6" class="ltx_equation ltx_eqn_table">
+
+<tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="S1.Ex6.m1" class="ltx_Math" alttext="\hat{f}_{bag}(x)=\frac{1}{B}\sum_{b=1}^{B}\hat{f}{*b}(x)" display="block"><mrow><mrow><msub><mover accent="true"><mi>f</mi><mo stretchy="false">^</mo></mover><mrow><mi>b</mi><mo>⁢</mo><mi>a</mi><mo>⁢</mo><mi>g</mi></mrow></msub><mo>⁢</mo><mrow><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></mrow><mo>=</mo><mrow><mfrac><mn>1</mn><mi>B</mi></mfrac><mo>⁢</mo><mrow><munderover><mo largeop="true" movablelimits="false" symmetric="true">∑</mo><mrow><mi>b</mi><mo>=</mo><mn>1</mn></mrow><mi>B</mi></munderover><mrow><mrow><mover accent="true"><mi>f</mi><mo stretchy="false">^</mo></mover><mo>*</mo><mi>b</mi></mrow><mo>⁢</mo><mrow><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></mrow></mrow></mrow></mrow></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+</tr>
+</table>
+<p class="ltx_p">This is called bagging.</p>
+<ul id="S1.I10" class="ltx_itemize">
+<li id="S1.I10.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S1.I10.i1.p1" class="ltx_para">
+<p class="ltx_p">For <em class="ltx_emph ltx_font_italic">regression trees</em>: the above prescription applied.</p>
+</div>
+</li>
+<li id="S1.I10.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">•</span> 
+<div id="S1.I10.i2.p1" class="ltx_para">
+<p class="ltx_p">For <em class="ltx_emph ltx_font_italic">classification trees</em>: for each test observation, we record the class predicted by each of the <math id="S1.I10.i2.p1.m1" class="ltx_Math" alttext="B" display="inline"><mi>B</mi></math> trees, and take a <em class="ltx_emph ltx_font_italic">majority vote</em>: the overall prediction is the most commonly occurring class among the <math id="S1.I10.i2.p1.m2" class="ltx_Math" alttext="B" display="inline"><mi>B</mi></math> predictions.
+</p>
+</div>
+</li>
+</ul>
+</div>
+</section>
+<section id="S1.SS5" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">1.5 </span>Out-of-Bag Error Estimation</h3>
+
+<div id="S1.SS5.p1" class="ltx_para">
+<p class="ltx_p">Recall that the key to bagging is that trees are repeatedly fit to bootstrapped subsets of the observations: one can show that on average, each bagged tree makes use of around <em class="ltx_emph ltx_font_italic">two-thirds</em> of the observations. The remaining one-third of the observations not used to fit a given bagged tree are referred to as <em class="ltx_emph ltx_font_italic">the out-of-bag (OOB) observations</em>.
+
+<br class="ltx_break">We can predict the response for the <math id="S1.SS5.p1.m1" class="ltx_Math" alttext="i" display="inline"><mi>i</mi></math>th observation using each of the trees in which that observation was OOB: this will yield around <math id="S1.SS5.p1.m2" class="ltx_Math" alttext="B/3" display="inline"><mrow><mi>B</mi><mo>/</mo><mn>3</mn></mrow></math> predictions for the <math id="S1.SS5.p1.m3" class="ltx_Math" alttext="i" display="inline"><mi>i</mi></math>th observation, which we average (so predict 1/3 using the other 2/3).
+
+<br class="ltx_break">If <math id="S1.SS5.p1.m4" class="ltx_Math" alttext="B" display="inline"><mi>B</mi></math> is large, this estimate is essentially the <em class="ltx_emph ltx_font_italic">LOO cross-validation</em> error for bagging</p>
+<ul id="S1.I11" class="ltx_itemize">
+<li id="S1.I11.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item"><math id="S1.I11.i1.m1" class="ltx_Math" alttext="\rightarrow" display="inline"><mo>→</mo></math></span> 
+<div id="S1.I11.i1.p1" class="ltx_para">
+<p class="ltx_p">With a large number of models <math id="S1.I11.i1.p1.m1" class="ltx_Math" alttext="B" display="inline"><mi>B</mi></math>, bagging tends to use almost all the available data for training and the number of models that do not include a specific observation in bagging is reduced. Thus providing an estimate of the generalization error similar to what would be obtained with LOO-CV.</p>
+</div>
+</li>
+</ul>
+</div>
+</section>
+<section id="S1.SS6" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">1.6 </span>Random Forests</h3>
+
+<div id="S1.SS6.p1" class="ltx_para">
+<p class="ltx_p">Random forests provide an improvement over bagged trees by way of a small tweak that <em class="ltx_emph ltx_font_italic">decorrelates</em> the trees. This reduces the variance when we average the trees.</p>
+<ul id="S1.I12" class="ltx_itemize">
+<li id="S1.I12.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item"><math id="S1.I12.i1.m1" class="ltx_Math" alttext="\rightarrow" display="inline"><mo>→</mo></math></span> 
+<div id="S1.I12.i1.p1" class="ltx_para">
+<p class="ltx_p">When each tree considers all available variables for each split, the trees tend to be similar to each other: this means they make similar errors, and the average of these similar predictions does not effectively reduce variance.</p>
+</div>
+</li>
+</ul>
+<p class="ltx_p">As in bagging, we build a number of decision trees on bootstrapped training samples; but when building these decision trees, each time a split in a tree is considered, a random selection of <math id="S1.SS6.p1.m1" class="ltx_Math" alttext="m" display="inline"><mi>m</mi></math> predictors is chosen as <em class="ltx_emph ltx_font_italic">split candidates</em> from the full set of <math id="S1.SS6.p1.m2" class="ltx_Math" alttext="p" display="inline"><mi>p</mi></math> predictors. The split is allowed to use only one of those <math id="S1.SS6.p1.m3" class="ltx_Math" alttext="m" display="inline"><mi>m</mi></math> predictors.
+
+<br class="ltx_break">A fresh selection of <math id="S1.SS6.p1.m4" class="ltx_Math" alttext="m" display="inline"><mi>m</mi></math> predictors is taken at each split, and typically we choose <math id="S1.SS6.p1.m5" class="ltx_Math" alttext="m\approx\sqrt{p}" display="inline"><mrow><mi>m</mi><mo>≈</mo><msqrt><mi>p</mi></msqrt></mrow></math> — the number of predictors considered at each split is approximately equal to the square root of the total number of predictors.</p>
+</div>
+<figure id="S1.F5" class="ltx_figure"><img src="images/fig7.png" id="S1.F5.g1" class="ltx_graphics ltx_centering" width="325" height="228" alt="Results from random forests for the fifteen-class gene expression data set with ">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 5: </span>Results from random forests for the fifteen-class gene expression data set with <math id="S1.F5.m6" class="ltx_Math" alttext="p=500" display="inline"><mrow><mi>p</mi><mo>=</mo><mn>500</mn></mrow></math> predictors. Each colored line corresponds to a different value of <math id="S1.F5.m7" class="ltx_Math" alttext="m" display="inline"><mi>m</mi></math>, the number of predictors available for splitting at each interior tree node. Random forests <math id="S1.F5.m8" class="ltx_Math" alttext="(m&lt;p)" display="inline"><mrow><mo stretchy="false">(</mo><mrow><mi>m</mi><mo>&lt;</mo><mi>p</mi></mrow><mo stretchy="false">)</mo></mrow></math> lead to a slight improvement over bagging <math id="S1.F5.m9" class="ltx_Math" alttext="(m=p)" display="inline"><mrow><mo stretchy="false">(</mo><mrow><mi>m</mi><mo>=</mo><mi>p</mi></mrow><mo stretchy="false">)</mo></mrow></math>. A single classification tree has an error rate of <math id="S1.F5.m10" class="ltx_Math" alttext="45.7\%" display="inline"><mrow><mn>45.7</mn><mo>%</mo></mrow></math>.</figcaption>
+</figure>
+</section>
+<section id="S1.SS7" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">1.7 </span>Boosting</h3>
+
+<div id="S1.SS7.p1" class="ltx_para">
+<p class="ltx_p">Like bagging, boosting is a general approach that can be applied to many statistical learning methods for regression or classification. We only discuss boosting for decision trees.
+
+<br class="ltx_break">Recall that bagging involves creating multiple copies of the original training data set using the bootstrap, fitting a separate decision tree to each copy, and then combining all of the trees in order to create a single predictive model. Boosting works in a similar way, except that the trees are grown <em class="ltx_emph ltx_font_italic">sequentially</em>: each tree is grown using information from previously grown trees.</p>
+</div>
+</section>
+<section id="S1.SS8" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">1.8 </span>Boosting algorithm</h3>
+
+<div id="S1.SS8.p1" class="ltx_para">
+<ol id="S1.I13" class="ltx_enumerate">
+<li id="S1.I13.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">1.</span> 
+<div id="S1.I13.i1.p1" class="ltx_para">
+<p class="ltx_p">Set <math id="S1.I13.i1.p1.m1" class="ltx_Math" alttext="\hat{f}(x)=0" display="inline"><mrow><mrow><mover accent="true"><mi>f</mi><mo stretchy="false">^</mo></mover><mo>⁢</mo><mrow><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></mrow><mo>=</mo><mn>0</mn></mrow></math> and <math id="S1.I13.i1.p1.m2" class="ltx_Math" alttext="r_{i}=y_{i}" display="inline"><mrow><msub><mi>r</mi><mi>i</mi></msub><mo>=</mo><msub><mi>y</mi><mi>i</mi></msub></mrow></math> for all <math id="S1.I13.i1.p1.m3" class="ltx_Math" alttext="i" display="inline"><mi>i</mi></math> in the training set.</p>
+</div>
+</li>
+<li id="S1.I13.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">2.</span> 
+<div id="S1.I13.i2.p1" class="ltx_para">
+<p class="ltx_p">For <math id="S1.I13.i2.p1.m1" class="ltx_Math" alttext="b=1,2,\ldots,B" display="inline"><mrow><mi>b</mi><mo>=</mo><mrow><mn>1</mn><mo>,</mo><mn>2</mn><mo>,</mo><mi mathvariant="normal">…</mi><mo>,</mo><mi>B</mi></mrow></mrow></math>, repeat:</p>
+<ol id="S1.I13.i2.I1" class="ltx_enumerate">
+<li id="S1.I13.i2.I1.ix1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">2.1</span> 
+<div id="S1.I13.i2.I1.ix1.p1" class="ltx_para">
+<p class="ltx_p">Fit a tree <math id="S1.I13.i2.I1.ix1.p1.m1" class="ltx_Math" alttext="\hat{f}^{b}" display="inline"><msup><mover accent="true"><mi>f</mi><mo stretchy="false">^</mo></mover><mi>b</mi></msup></math> with <math id="S1.I13.i2.I1.ix1.p1.m2" class="ltx_Math" alttext="d" display="inline"><mi>d</mi></math> splits (<math id="S1.I13.i2.I1.ix1.p1.m3" class="ltx_Math" alttext="d+1" display="inline"><mrow><mi>d</mi><mo>+</mo><mn>1</mn></mrow></math> terminal nodes) to the
+training data <math id="S1.I13.i2.I1.ix1.p1.m4" class="ltx_Math" alttext="(X,r)" display="inline"><mrow><mo stretchy="false">(</mo><mi>X</mi><mo>,</mo><mi>r</mi><mo stretchy="false">)</mo></mrow></math>.</p>
+</div>
+</li>
+<li id="S1.I13.i2.I1.ix2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">2.2</span> 
+<div id="S1.I13.i2.I1.ix2.p1" class="ltx_para">
+<p class="ltx_p">Update <math id="S1.I13.i2.I1.ix2.p1.m1" class="ltx_Math" alttext="\hat{f}" display="inline"><mover accent="true"><mi>f</mi><mo stretchy="false">^</mo></mover></math> by adding in a shrunken version of the new tree:</p>
+<table id="S1.Ex7" class="ltx_equation ltx_eqn_table">
+
+<tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="S1.Ex7.m1" class="ltx_Math" alttext="\hat{f}(x)\leftarrow\hat{f}(x)+\lambda\hat{f}^{b}(x)" display="block"><mrow><mrow><mover accent="true"><mi>f</mi><mo stretchy="false">^</mo></mover><mo>⁢</mo><mrow><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></mrow><mo>←</mo><mrow><mrow><mover accent="true"><mi>f</mi><mo stretchy="false">^</mo></mover><mo>⁢</mo><mrow><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></mrow><mo>+</mo><mrow><mi>λ</mi><mo>⁢</mo><msup><mover accent="true"><mi>f</mi><mo stretchy="false">^</mo></mover><mi>b</mi></msup><mo>⁢</mo><mrow><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></mrow></mrow></mrow></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+</tr>
+</table>
+</div>
+</li>
+<li id="S1.I13.i2.I1.ix3" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">2.3</span> 
+<div id="S1.I13.i2.I1.ix3.p1" class="ltx_para">
+<p class="ltx_p">Update the residuals,</p>
+<table id="S1.Ex8" class="ltx_equation ltx_eqn_table">
+
+<tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="S1.Ex8.m1" class="ltx_Math" alttext="r_{i}\leftarrow r_{i}-\lambda\hat{f}^{b}(x_{i})" display="block"><mrow><msub><mi>r</mi><mi>i</mi></msub><mo>←</mo><mrow><msub><mi>r</mi><mi>i</mi></msub><mo>-</mo><mrow><mi>λ</mi><mo>⁢</mo><msup><mover accent="true"><mi>f</mi><mo stretchy="false">^</mo></mover><mi>b</mi></msup><mo>⁢</mo><mrow><mo stretchy="false">(</mo><msub><mi>x</mi><mi>i</mi></msub><mo stretchy="false">)</mo></mrow></mrow></mrow></mrow></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+</tr>
+</table>
+</div>
+</li>
+</ol>
+</div>
+</li>
+<li id="S1.I13.i3" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">3.</span> 
+<div id="S1.I13.i3.p1" class="ltx_para">
+<p class="ltx_p">Output the boosted model,</p>
+<table id="S1.Ex9" class="ltx_equation ltx_eqn_table">
+
+<tr class="ltx_equation ltx_eqn_row ltx_align_baseline">
+<td class="ltx_eqn_cell ltx_eqn_center_padleft"></td>
+<td class="ltx_eqn_cell ltx_align_center"><math id="S1.Ex9.m1" class="ltx_Math" alttext="\hat{f}(x)=\sum_{b=1}^{B}\lambda\hat{f}^{b}(x)" display="block"><mrow><mrow><mover accent="true"><mi>f</mi><mo stretchy="false">^</mo></mover><mo>⁢</mo><mrow><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></mrow><mo>=</mo><mrow><munderover><mo largeop="true" movablelimits="false" symmetric="true">∑</mo><mrow><mi>b</mi><mo>=</mo><mn>1</mn></mrow><mi>B</mi></munderover><mrow><mi>λ</mi><mo>⁢</mo><msup><mover accent="true"><mi>f</mi><mo stretchy="false">^</mo></mover><mi>b</mi></msup><mo>⁢</mo><mrow><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></mrow></mrow></mrow></math></td>
+<td class="ltx_eqn_cell ltx_eqn_center_padright"></td>
+</tr>
+</table>
+</div>
+</li>
+</ol>
+<p class="ltx_p">The residuals <math id="S1.SS8.p1.m1" class="ltx_Math" alttext="r_{i}" display="inline"><msub><mi>r</mi><mi>i</mi></msub></math> are initially set equal to the actual values <math id="S1.SS8.p1.m2" class="ltx_Math" alttext="y_{i}" display="inline"><msub><mi>y</mi><mi>i</mi></msub></math> for all data in the training set. The residual is the difference between the observed value and the value predicted by the model. Since the model initially makes no prediction (<math id="S1.SS8.p1.m3" class="ltx_Math" alttext="\hat{f}(x)=0" display="inline"><mrow><mrow><mover accent="true"><mi>f</mi><mo stretchy="false">^</mo></mover><mo>⁢</mo><mrow><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></mrow><mo>=</mo><mn>0</mn></mrow></math>), the initial residuals are simply the observed values <math id="S1.SS8.p1.m4" class="ltx_Math" alttext="y_{i}" display="inline"><msub><mi>y</mi><mi>i</mi></msub></math>.
+
+<br class="ltx_break"><em class="ltx_emph ltx_font_italic">What is the idea behind this procedure?</em>
+
+<br class="ltx_break">Unlike fitting a single large decision tree to the data, which amounts to fitting the data hard and potentially overfitting, the boosting approach instead learns slowly. Given the current model,</p>
+<ul id="S1.I14" class="ltx_itemize">
+<li id="S1.I14.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">@itemi</span> 
+<div id="S1.I14.i1.p1" class="ltx_para">
+<p class="ltx_p">We fit a decision tree to the residuals from the model. We then add this new decision tree into the fitted function in order to update the residuals. Each of these trees can be rather small, with just a few terminal nodes, determined by the parameter <math id="S1.I14.i1.p1.m1" class="ltx_Math" alttext="d" display="inline"><mi>d</mi></math> in the algorithm.</p>
+</div>
+</li>
+<li id="S1.I14.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">@itemi</span> 
+<div id="S1.I14.i2.p1" class="ltx_para">
+<p class="ltx_p">By fitting small trees to the residuals, we slowly improve <math id="S1.I14.i2.p1.m1" class="ltx_Math" alttext="\hat{f}" display="inline"><mover accent="true"><mi>f</mi><mo stretchy="false">^</mo></mover></math> in areas where it does not perform well. <em class="ltx_emph ltx_font_italic">The shrinkage parameter</em> <math id="S1.I14.i2.p1.m2" class="ltx_Math" alttext="\lambda" display="inline"><mi>λ</mi></math> slows the process down even further, allowing more and different shaped trees to attack the residuals.</p>
+</div>
+</li>
+</ul>
+</div>
+<section id="S1.SS8.SSS1" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">1.8.1 </span>Boosting for classification</h4>
+
+<div id="S1.SS8.SSS1.p1" class="ltx_para">
+<p class="ltx_p">Boosting for classification is similar in spirit to boosting for regression, but is a bit more complex. The R package <span class="ltx_text ltx_font_typewriter">gbm</span> (gradient boosted models) handles a variety of regression and classification problems.</p>
+</div>
+<figure id="S1.F6" class="ltx_figure"><img src="images/fig8.png" id="S1.F6.g1" class="ltx_graphics ltx_centering" width="325" height="227" alt="Results from performing ">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 6: </span>Results from performing <em class="ltx_emph ltx_font_italic">boosting</em> and <em class="ltx_emph ltx_font_italic">random forests</em> on the fifteen-class gene expression data set in order to predict cancer vs normal. For the two boosted models, <math id="S1.F6.m3" class="ltx_Math" alttext="\lambda=0.01" display="inline"><mrow><mi>λ</mi><mo>=</mo><mn>0.01</mn></mrow></math>. Depth-1 trees slightly outperform depth-2 trees, and both outperform the random forest, although the standard errors are around 0.02, making none of these differences significant. The test error rate for a single tree is <math id="S1.F6.m4" class="ltx_Math" alttext="24\%" display="inline"><mrow><mn>24</mn><mo>%</mo></mrow></math>.</figcaption>
+</figure>
+</section>
+<section id="S1.SS8.SSS2" class="ltx_subsubsection">
+<h4 class="ltx_title ltx_title_subsubsection">
+<span class="ltx_tag ltx_tag_subsubsection">1.8.2 </span>Tuning parameters for boosting</h4>
+
+<div id="S1.SS8.SSS2.p1" class="ltx_para">
+<ol id="S1.I15" class="ltx_enumerate">
+<li id="S1.I15.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">1.</span> 
+<div id="S1.I15.i1.p1" class="ltx_para">
+<p class="ltx_p"><em class="ltx_emph ltx_font_italic">The number of trees</em> <math id="S1.I15.i1.p1.m1" class="ltx_Math" alttext="B" display="inline"><mi>B</mi></math>. Unlike bagging and random forests, <em class="ltx_emph ltx_font_italic">boosting can overfit</em> if <math id="S1.I15.i1.p1.m2" class="ltx_Math" alttext="B" display="inline"><mi>B</mi></math> is too large, although this overfitting tends to occur slowly if at all. We use cross-validation to select <math id="S1.I15.i1.p1.m3" class="ltx_Math" alttext="B" display="inline"><mi>B</mi></math>.</p>
+</div>
+</li>
+<li id="S1.I15.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">2.</span> 
+<div id="S1.I15.i2.p1" class="ltx_para">
+<p class="ltx_p"><em class="ltx_emph ltx_font_italic">The shrinkage parameter</em> <math id="S1.I15.i2.p1.m1" class="ltx_Math" alttext="\lambda" display="inline"><mi>λ</mi></math>, a small positive number. This controls the rate at which boosting learns. Typical values are 0.01 or 0.001. Very small <math id="S1.I15.i2.p1.m2" class="ltx_Math" alttext="\lambda" display="inline"><mi>λ</mi></math> can require using a very large value of <math id="S1.I15.i2.p1.m3" class="ltx_Math" alttext="B" display="inline"><mi>B</mi></math> in order to achieve good performance.</p>
+</div>
+</li>
+<li id="S1.I15.i3" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">3.</span> 
+<div id="S1.I15.i3.p1" class="ltx_para">
+<p class="ltx_p"><em class="ltx_emph ltx_font_italic">The number of splits <math id="S1.I15.i3.p1.m1" class="ltx_Math" alttext="d" display="inline"><mi>d</mi></math> in each tree</em>, which controls the complexity of the boosted ensemble. Often <math id="S1.I15.i3.p1.m2" class="ltx_Math" alttext="d=1" display="inline"><mrow><mi>d</mi><mo>=</mo><mn>1</mn></mrow></math> works well, in which case each tree is a <em class="ltx_emph ltx_font_italic">stump</em>, consisting of a single split and resulting in an additive model. More generally <math id="S1.I15.i3.p1.m3" class="ltx_Math" alttext="d" display="inline"><mi>d</mi></math> is the interaction depth, and controls the interaction order of the boosted model, since <math id="S1.I15.i3.p1.m4" class="ltx_Math" alttext="d" display="inline"><mi>d</mi></math> splits can involve at most <math id="S1.I15.i3.p1.m5" class="ltx_Math" alttext="d" display="inline"><mi>d</mi></math> variables.</p>
+</div>
+</li>
+</ol>
+</div>
+<figure id="S1.F7" class="ltx_figure"><img src="images/fig9.png" id="S1.F7.g1" class="ltx_graphics ltx_centering" width="379" height="293" alt="Dont know">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 7: </span>Dont know</figcaption>
+</figure>
+<figure id="S1.F8" class="ltx_figure"><img src="images/fig10.png" id="S1.F8.g1" class="ltx_graphics ltx_centering" width="379" height="280" alt="Dont know">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 8: </span>Dont know</figcaption>
+</figure>
+</section>
+</section>
+<section id="S1.SS9" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">1.9 </span>Variable importance measure</h3>
+
+<div id="S1.SS9.p1" class="ltx_para">
+<ul id="S1.I16" class="ltx_itemize">
+<li id="S1.I16.i1" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">–</span> 
+<div id="S1.I16.i1.p1" class="ltx_para">
+<p class="ltx_p">For bagged/RF regression trees, we record the total amount that the RSS is decreased due to splits <em class="ltx_emph ltx_font_italic">over a given predictor</em>, averaged over all <math id="S1.I16.i1.p1.m1" class="ltx_Math" alttext="B" display="inline"><mi>B</mi></math> trees. A large value indicates an important predictor.</p>
+</div>
+</li>
+<li id="S1.I16.i2" class="ltx_item" style="list-style-type:none;">
+<span class="ltx_tag ltx_tag_item">–</span> 
+<div id="S1.I16.i2.p1" class="ltx_para">
+<p class="ltx_p">Similarly, for bagged/RF classification trees, we add up the total amount that the Gini index is decreased by splits over a given predictor, <em class="ltx_emph ltx_font_italic">averaged over all <math id="S1.I16.i2.p1.m1" class="ltx_Math" alttext="B" display="inline"><mi>B</mi></math> trees</em>.</p>
+</div>
+</li>
+</ul>
+</div>
+<figure id="S1.F9" class="ltx_figure"><img src="images/fig11.png" id="S1.F9.g1" class="ltx_graphics ltx_centering" width="271" height="247" alt="Variable importance plot for the ">
+<figcaption class="ltx_caption ltx_centering"><span class="ltx_tag ltx_tag_figure">Figure 9: </span>Variable importance plot for the <span class="ltx_text ltx_font_typewriter">Heart</span> data</figcaption>
+</figure>
+</section>
+<section id="S1.SS10" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">1.10 </span>Summary</h3>
+
+<div id="S1.SS10.p1" class="ltx_para">
+<p class="ltx_p">Decision trees are simple and interpretable models for regression and classification
+
+<br class="ltx_break">However they are often not competitive with other methods in terms of prediction accuracy
+
+<br class="ltx_break">Bagging, random forests and boosting are good methods for improving the prediction accuracy of trees.
+
+<br class="ltx_break">The latter two methods— random forests and boosting— are among the state-of-the-art methods for supervised learning. However their results can be difficult to interpret.</p>
+</div>
+</section>
+<section id="S1.SS11" class="ltx_subsection">
+<h3 class="ltx_title ltx_title_subsection">
+<span class="ltx_tag ltx_tag_subsection">1.11 </span>Change Tracking</h3>
+
+<div id="S1.SS11.p1" class="ltx_para">
+<p class="ltx_p">I introduce this section to check the versioning system and change tracking using Git.</p>
+</div>
+</section>
+</section>
+</article>
+</div>
+<footer class="ltx_page_footer">
+<div class="ltx_page_logo">Generated  on Tue Dec 16 16:08:58 2025 by <a href="http://dlmf.nist.gov/LaTeXML/">LaTeXML <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAOCAYAAAD5YeaVAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9wKExQZLWTEaOUAAAAddEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIFRoZSBHSU1Q72QlbgAAAdpJREFUKM9tkL+L2nAARz9fPZNCKFapUn8kyI0e4iRHSR1Kb8ng0lJw6FYHFwv2LwhOpcWxTjeUunYqOmqd6hEoRDhtDWdA8ApRYsSUCDHNt5ul13vz4w0vWCgUnnEc975arX6ORqN3VqtVZbfbTQC4uEHANM3jSqXymFI6yWazP2KxWAXAL9zCUa1Wy2tXVxheKA9YNoR8Pt+aTqe4FVVVvz05O6MBhqUIBGk8Hn8HAOVy+T+XLJfLS4ZhTiRJgqIoVBRFIoric47jPnmeB1mW/9rr9ZpSSn3Lsmir1fJZlqWlUonKsvwWwD8ymc/nXwVBeLjf7xEKhdBut9Hr9WgmkyGEkJwsy5eHG5vN5g0AKIoCAEgkEkin0wQAfN9/cXPdheu6P33fBwB4ngcAcByHJpPJl+fn54mD3Gg0NrquXxeLRQAAwzAYj8cwTZPwPH9/sVg8PXweDAauqqr2cDjEer1GJBLBZDJBs9mE4zjwfZ85lAGg2+06hmGgXq+j3+/DsixYlgVN03a9Xu8jgCNCyIegIAgx13Vfd7vdu+FweG8YRkjXdWy329+dTgeSJD3ieZ7RNO0VAXAPwDEAO5VKndi2fWrb9jWl9Esul6PZbDY9Go1OZ7PZ9z/lyuD3OozU2wAAAABJRU5ErkJggg==" alt="[LOGO]"></a>
+</div></footer>
+</div>
+</body>
+</html>

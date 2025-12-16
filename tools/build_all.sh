@@ -83,7 +83,7 @@ for doc_dir in "${DOC_DIRS[@]}"; do
   sed -i -E 's/(src=")(images\/)+/\1images\//g' "$html_raw"
 
   # 2. Rewrite any image src to images/<filename>
-  sed -i -E 's/(src=")([^"]*\/)?([^"\/]+\.(png|jpg|jpeg|gif|svg|pdf))"/\1images\/\3"/gI "$html_raw"
+  sed -i -E 's/(src=")([^"]*\/)?([^"\/]+\.(png|jpg|jpeg|gif|svg|pdf))"/\1images\/\3"/gI' "$html_raw"
 
   echo "==> [$doc_name] Post-process -> Navigable HTML"
 
