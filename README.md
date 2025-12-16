@@ -101,16 +101,46 @@ site/main/index.nav.html
 
 ---
 
-## Current Status
+## Phase 5 —  Automation and Batch Ingestion
 
-At this stage, the project provides:
+The project includes an automated ingestion pipeline that processes **multiple LaTeX documents** in batch mode.
 
-* structured LaTeX sources
-* HTML conversion via LaTeXML
-* navigable web output
-* clean Git history demonstrating document evolution
+All documents placed under:
 
-The next step is to automate the full ingestion process across multiple documents.
+```
+src/<document_name>/
+```
+
+are automatically converted into structured, navigable web output using a single command:
+
+```bash
+./tools/build_all.sh
+```
+
+For each document, the pipeline:
+
+* converts LaTeX sources to HTML5 using LaTeXML
+* preserves document structure and hierarchy
+* generates a navigable HTML version with stable section identifiers
+* collects and organizes local image assets
+* produces reproducible, per-document web output
+* writes detailed conversion logs
+
+The resulting web output is generated under:
+
+```
+site/<document_name>/
+```
+
+This design enables scalable document ingestion and reflects real-world workflows for large technical documentation sets.
+
+---
+
+## Logging and Reproducibility
+
+Each pipeline execution produces per-document logs, allowing inspection of conversion warnings or errors without interrupting the overall process.
+
+The build process is deterministic: given the same LaTeX sources, the generated web output can be fully reproduced from version-controlled inputs.
 
 ---
 
