@@ -2,9 +2,9 @@
 
 ## Overview
 
-This project demonstrates a **clean, reproducible workflow** for converting LaTeX documents into **web-friendly HTML representations**, with explicit support for **navigation, versioning, and change tracking**.
+This project demonstrates a **clean, reproducible workflow** for converting LaTeX documents into **web-friendly HTML representations**, with support for **navigation, versioning, and change tracking**.
 
-The goal is to explore how technical LaTeX documents can be ingested, processed, and exposed in formats suitable for online browsing and future search or AI-assisted use.
+It enables the ingestion, processing, and display of LaTeX content in formats suited for online browsing and AI-assisted use.
 
 ---
 
@@ -31,22 +31,13 @@ docs/       # Notes and documentation
 
 ## Phase 0 — Project Initialization
 
-The project starts from a clean Linux environment with:
-
-* a minimal directory structure
-* Git version control initialized
-* a clear separation between sources, tools, and generated output
-
-This ensures a reproducible and maintainable setup from the beginning.
+The project starts with a clean Linux environment, Git version control, and a minimal directory structure ensuring reproducibility and maintainability.
 
 ---
 
 ## Phase 1 — LaTeX Source Documents
 
-LaTeX documents are organized so that:
-
-* each document lives in its own directory under `src/`
-* image assets are stored locally alongside the document
+LaTeX documents are organized in individual directories under src/, with images stored alongside each document.
 
 Example:
 
@@ -62,19 +53,17 @@ This structure supports multi-document ingestion and avoids resource conflicts.
 
 ## Phase 2 — LaTeX to HTML Conversion
 
-The project uses **LaTeXML** to convert LaTeX sources into HTML:
+LaTeXML is used to convert LaTeX sources to HTML:
 
 * mathematical content is preserved
 * document structure is retained
-* a first web-oriented representation is generated
-
-The raw HTML output is stored under `site/` and serves as the baseline for further processing.
+* a web-oriented representation is generated
 
 ---
 
 ## Phase 3 — HTML Post-processing and Navigation
 
-A custom post-processing script (`tools/postprocess_html.py`) enhances the raw HTML by:
+Custom post-processing script (`tools/postprocess_html.py`) enhances the raw HTML by:
 
 * assigning stable, readable identifiers to section headings
 * generating a table of contents
@@ -86,61 +75,32 @@ This step decouples semantic conversion from presentation logic.
 
 ## Phase 4 — Versioning and Change Tracking
 
-The project uses Git to track:
-
-* LaTeX source changes
-* corresponding updates in the generated HTML output
-
-This demonstrates end-to-end traceability from document edits to their web representation, a key requirement for large technical documentation systems.
-
-A sample navigable HTML output is available at:
-
-```
-site/main/index.nav.html
-```
+Git tracks changes in the LaTeX source and corresponding updates in the web output. This demonstrates end-to-end traceability from LaTeX edits to their web representation.
 
 ---
 
 ## Phase 5 —  Automation and Batch Ingestion
 
-The project includes an automated ingestion pipeline that processes **multiple LaTeX documents** in batch mode.
-
-All documents placed under:
-
-```
-src/<document_name>/
-```
-
-are automatically converted into structured, navigable web output using a single command:
+The project includes an automated pipeline to process **multiple LaTeX documents** in batch mode. Simply place documents under `src/<document_name>/` and run:
 
 ```bash
 ./tools/build_all.sh
 ```
 
-For each document, the pipeline:
-
-* converts LaTeX sources to HTML5 using LaTeXML
-* preserves document structure and hierarchy
-* generates a navigable HTML version with stable section identifiers
-* collects and organizes local image assets
-* produces reproducible, per-document web output
-* writes detailed conversion logs
-
-The resulting web output is generated under:
-
-```
-site/<document_name>/
-```
-
-This design enables scalable document ingestion and reflects real-world workflows for large technical documentation sets.
+The pipeline generates structured web output, organizes images, and writes detailed logs.
 
 ---
 
 ## Logging and Reproducibility
 
-Each pipeline execution produces per-document logs, allowing inspection of conversion warnings or errors without interrupting the overall process.
+Logs are generated for each document, allowing inspection of warnings or errors. The process is deterministic: the same LaTeX sources will always reproduce the same web output.
 
-The build process is deterministic: given the same LaTeX sources, the generated web output can be fully reproduced from version-controlled inputs.
+---
+
+## AI / Search Readiness
+The pipeline produces structured HTML with stable section identifiers, enabling extensions such as semantic search, document chunking, and AI-assisted exploration.
+
+For detailed AI/search feasibility, check `docs/ai_search_feasibility.md`.
 
 ---
 
