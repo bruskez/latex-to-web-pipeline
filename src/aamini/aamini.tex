@@ -20,12 +20,12 @@ Hence we also discuss \emph{bagging}, \emph{random forests}, and \emph{boosting}
 \begin{figure}[htp]
 \begin{minipage}{0.48\linewidth}
 \centering
-\includegraphics[width=0.7\textwidth]{Screenshot 2024-07-19 201948}
+\includegraphics[width=0.7\textwidth]{fig1}
 \end{minipage}
 \hfill
 \begin{minipage}{0.48\linewidth}
 \centering
-\includegraphics[width=0.7\textwidth]{Screenshot 2024-07-19 202050}
+\includegraphics[width=0.7\textwidth]{fig2}
 \end{minipage}
 \caption{Hitters data. \emph{Left}: salary is color-coded from low (blue, green) to high (yellow, red). \emph{Right}: decision tree for these data. The left-hand branch corresponds to Years$<$4.5, and the right-hand branch corresponds to Years$\geq$4.5.}
 \end{figure}
@@ -36,7 +36,7 @@ Hence we also discuss \emph{bagging}, \emph{random forests}, and \emph{boosting}
 \end{itemize}
 \begin{figure}[htp]
 \centering
-\includegraphics[width=0.45\textwidth]{Screenshot 2024-07-19 202633}
+\includegraphics[width=0.45\textwidth]{fig3}
 \caption{The tree stratifies or segments the players into three regions of predictor space: $R_1 =\{X \mid Years<4.5\}, R_2 =\{X \mid Years\geq4.5, Hits<117.5\}, and R_3 =\{X \mid Years \geq 4.5, Hits\geq117.5$\}. The regions \(R_1, R_2\) and \(R_3\) are known as \emph{terminal nodes}.}
 \end{figure}
 
@@ -62,7 +62,7 @@ where \(\hat{y}_{R_j}\) is the mean response for the training observations withi
 
 \begin{figure}[htp]
 \centering
-\includegraphics[width=0.5\textwidth]{Screenshot 2024-07-19 205851}
+\includegraphics[width=0.5\textwidth]{fig4}
 \caption{\emph{Top Left}: A partition of two-dimensional feature space that could not result from recursive binary splitting. \emph{Top Right}: The output of recursive binary splitting on a two-dimensional example. \emph{Bottom Left}: A tree corresponding to the partition in the top right panel. \emph{Bottom Right}: A perspective plot of the prediction surface corresponding to that tree.}
 \end{figure}
 
@@ -100,12 +100,12 @@ Average the results, and pick $\alpha$ to minimize the average error.
 \begin{figure}[htp]
 \begin{minipage}{0.43\linewidth}
 \centering
-\includegraphics[width=0.9\textwidth]{Screenshot 2024-07-19 215931}
+\includegraphics[width=0.9\textwidth]{fig5}
 \end{minipage}
 \hfill
 \begin{minipage}{0.53\linewidth}
 \centering
-\includegraphics[width=1\textwidth]{Screenshot 2024-07-19 215953}
+\includegraphics[width=1\textwidth]{fig6}
 \end{minipage}
 \caption{We randomly divided the data set in the training set (132) and in the test set (131). A large regression tree (no pruning) on the training data and varied $\alpha$ to create subtrees with different numbers of terminal nodes are built. Finally, we performed six-fold cross-validation to estimate the cross-validated MSE of the trees as a function of $\alpha$.}
 \end{figure}
@@ -169,7 +169,7 @@ As in bagging, we build a number of decision trees on bootstrapped training samp
 
 \begin{figure}[htp]
 \centering
-\includegraphics[width=0.6\textwidth]{Screenshot 2024-07-20 125739}
+\includegraphics[width=0.6\textwidth]{fig7}
 \caption{Results from random forests for the fifteen-class gene expression data set with $p=500$ predictors. Each colored line corresponds to a different value of $m$, the number of predictors available for splitting at each interior tree node. Random forests $(m < p)$ lead to a slight improvement over bagging $(m = p)$. A single classification tree has an error rate of $45.7\%$.}
 \end{figure}
 
@@ -207,7 +207,7 @@ Boosting for classification is similar in spirit to boosting for regression, but
 
 \begin{figure}[htp]
 \centering
-\includegraphics[width=0.6\textwidth]{Screenshot 2024-07-19 223105}
+\includegraphics[width=0.6\textwidth]{fig8}
 \caption{Results from performing \emph{boosting} and \emph{random forests} on the fifteen-class gene expression data set in order to predict cancer vs normal. For the two boosted models, $\lambda = 0.01$. Depth-1 trees slightly outperform depth-2 trees, and both outperform the random forest, although the standard errors are around 0.02, making none of these differences significant. The test error rate for a single tree is $24\%$.}
 \end{figure}
 
@@ -221,13 +221,13 @@ Boosting for classification is similar in spirit to boosting for regression, but
 
 \begin{figure}[htp]
 \centering
-\includegraphics[width=0.7\textwidth]{Screenshot 2024-07-19 223444}
+\includegraphics[width=0.7\textwidth]{fig9}
 \caption{Dont know}
 \end{figure}
 
 \begin{figure}[htp]
 \centering
-\includegraphics[width=0.7\textwidth]{Screenshot 2024-07-20 132453}
+\includegraphics[width=0.7\textwidth]{fig10}
 \caption{Dont know}
 \end{figure}
 
@@ -239,7 +239,7 @@ Boosting for classification is similar in spirit to boosting for regression, but
 \end{itemize}
 \begin{figure}[htp]
 \centering
-\includegraphics[width=0.5\textwidth]{Screenshot 2024-07-19 223624}
+\includegraphics[width=0.5\textwidth]{fig11}
 \caption{Variable importance plot for the \texttt{Heart} data}
 \end{figure}
 
@@ -248,7 +248,9 @@ Decision trees are simple and interpretable models for regression and classifica
 \\However they are often not competitive with other methods in terms of prediction accuracy
 \\Bagging, random forests and boosting are good methods for improving the prediction accuracy of trees.
 \\The latter two methods— random forests and boosting— are among the state-of-the-art methods for supervised learning. However their results can be difficult to interpret.
-VEDI SE SPOSTARE
+
+\subsection{Change Tracking}
+I introduce this section to check the versioning system and change tracking using Git. 
 
 
 \end{document}
